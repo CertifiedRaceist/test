@@ -117,4 +117,4 @@ if submitted:
     st.write("Data/Date: ", selected_date)
     st.write("Dostawca/Supplier: ", supplier)
     st.write("Godzina/Hour: ", hour)
-    st.write("Palety/Pallets: ", display-pallets)
+    st.write("Palety/Pallets: ", display_pallets)
