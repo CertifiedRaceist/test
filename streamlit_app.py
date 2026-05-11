@@ -33,7 +33,7 @@ def encode_awization_base64(supplier, date, hour, pallets):
     pallets_val = 0 if pallets == 0 else pallets
 
     binary = struct.pack(
-        ">>40sIbH",
+        ">40sIBH",
         supplier_bytes,
         date_days,
         slot,
