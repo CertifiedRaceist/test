@@ -62,7 +62,7 @@ def create_delivery_notification_pdf(
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    pdf.set_font("NotoSans", "B", 16)
+    pdf.set_font("NotoSans", 16)
     pdf.cell(0, 10, "AWIZACJA DOSTAWY / DELIVERY NOTIFICATION", ln=True)
 
     pdf.ln(5)
@@ -75,7 +75,7 @@ def create_delivery_notification_pdf(
 
     pdf.ln(10)
 
-    pdf.set_font("NotoSans", "B", 12)
+    pdf.set_font("NotoSans", 12)
     pdf.cell(0, 8, "DPH Code / Kod DPH:", ln=True)
 
     pdf.set_font("Courier", size=10)
