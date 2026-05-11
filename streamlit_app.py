@@ -3,6 +3,11 @@ import pandas as pd
 import math
 from pathlib import Path
 import datetime
+import struct
+import base64
+import qrcode
+from io import BytesIO
+
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
@@ -14,52 +19,27 @@ st.set_page_config(
 # Declare some useful functions.
 
 @st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
+def encode_awization_base64(supplier, date, hour, pallets):
+    supplier_bytes = supplier.encode("ascii", errors="ignore")[:40]
+    supplier_bytes = supplier_bytes.ljust(40, b" ")
+    
+    epoch = datetime.date(1970, 1, 1)
+    date_days = (date - epoch).days
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
+    h, m = map(int, hour.split(":"))
+    slot = ((h * 60 + m) - (8 * 60)) // 15  # 0–43
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
+    pallets_val = 0 if pallets == 0 else pallets
 
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
-
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
+    binary = struct.pack(
+        ">40sIbb",
+        supplier_bytes,
+        date_days,
+        slot,
+        pallets_val
     )
-
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-
-    return gdp_df
-
-gdp_df = get_gdp_data()
-
+    # Encode to Base64 
+    return base64.urlsafe_b64encode(binary).decode().rstrip("=")
 # -----------------------------------------------------------------------------
 # Draw the actual page
 
@@ -101,8 +81,9 @@ with st.form("awization_form"):
     pallets = st.number_input(
         "Liczba palet/Number of pallets", 
         min_value=0,
+        max_value=999,
         step=1,
-        placeholder="0 if not applicable"
+        placeholder="0 gdy nie dotyczy/0 if not applicable"
     )
 
 
@@ -113,8 +94,30 @@ if submitted:
     display_pallets = "-" if pallets == 0 else pallets
 
     
+    payload_b64 = encode_awization_base64(
+            supplier,
+            selected_date,
+            hour,
+            pallets
+        )
+
+
+    
     st.success("Submitted successfully!")
     st.write("Data/Date: ", selected_date)
     st.write("Dostawca/Supplier: ", supplier)
     st.write("Godzina/Hour: ", hour)
     st.write("Palety/Pallets: ", display_pallets)
+
+    
+    st.subheader("Kod Base64")
+    st.code(payload_b64, language="text")
+
+    # Generate QR
+    qr = qrcode.make(payload_b64)
+    buf = BytesIO()
+    qr.save(buf)
+
+    st.subheader("QR Code")
+    st.image(buf, caption="Zeskanuj kod QR / Scan QR")
+
