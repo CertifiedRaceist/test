@@ -64,31 +64,32 @@ gdp_df = get_gdp_data()
 # Draw the actual page
 
 '''
-# :earth_americas: GDP dashboard
+# Awizacje Delpharm
 '''
 
-st.header("Create awization", divider="gray")
+st.header("Stwórz awizacje/Create avization", divider="gray")
 
 with st.form("awization_form"):
     selected_date = st.date_input(
-        "Select date",
+        "Wybierz Date/Select date",
         value=datetime.date.today()
     )
-
-    supplier = st.selectbox(
-        "Select supplier",
-        ["Supplier A", "Supplier B", "Supplier C"]
+    
+    supplier = st.text_input(
+        "Wybierz dostawcę/Select supplier",
     )
 
     hour = st.selectbox(
-        "Select hour",
+        "Wybierz godzinę/Select hour",
         ["08:00", "12:00", "16:00"]
     )
 
-    submitted = st.form_submit_button("Submit")
+    submitted = st.form_submit_button("Potwierdź/Submit")
 
 if submitted:
+    supplier = supplier.strip().upper()
+    
     st.success("Submitted successfully!")
-    st.write("Date:", selected_date)
-    st.write("Supplier:", supplier)
-    st.write("Hour:", hour)
+    st.write("Data/Date:", selected_date)
+    st.write("Dostawca/Supplier:", supplier)
+    st.write("Godzina/Hour:", hour)
