@@ -52,13 +52,13 @@ def create_delivery_notification_pdf(
     pallets_display,
     payload_b64,):
         
+    pdf = FPDF()
     pdf.add_font(
         "NotoSans",
         "",
         str(Path(__file__).parent / "fonts" / "NotoSans-VariableFont_wdth,wght.ttf"),
         uni=True
     )
-    pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
