@@ -14,7 +14,7 @@ from PIL import Image
 favicon = Image.open(Path(__file__).parent / "assets" / "truck_delpharm.png")
 
 st.set_page_config(
-    page_title="Awizacje DPH / Delivery Notifications",
+    page_title="Awizacje DPH",
     page_icon=favicon,
 )
 
