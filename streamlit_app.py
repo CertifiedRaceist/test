@@ -95,7 +95,7 @@ def create_delivery_notification_pdf(
 # Draw the actual page
 
 '''
-# Awizacje DPH / Delivery Notifications
+# Awizacje DPH
 '''
 
 st.header("Stwórz awizację / Create delivery notification", divider="gray")
