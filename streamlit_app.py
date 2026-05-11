@@ -42,39 +42,39 @@ def encode_awization_base64(supplier, date, hour, pallets):
     # Encode to Base64 
     return base64.urlsafe_b64encode(binary).decode().rstrip("=")
 
-    def create_awization_pdf(
-    supplier,
-    selected_date,
-    hour,
-    pallets_display,
-    payload_b64,):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_auto_page_break(auto=True, margin=15)
-    
-        # Title
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, "AWIZACJA / AWIZATION", ln=True)
-    
-        pdf.ln(5)
-    
-        # Info
-        pdf.set_font("Helvetica", size=12)
-        pdf.cell(0, 8, f"Supplier / Dostawca: {supplier}", ln=True)
-        pdf.cell(0, 8, f"Date / Data: {selected_date}", ln=True)
-        pdf.cell(0, 8, f"Hour / Godzina: {hour}", ln=True)
-        pdf.cell(0, 8, f"Pallets / Palety: {pallets_display}", ln=True)
-    
-        pdf.ln(10)
-    
-        # Base64 code
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.cell(0, 8, "Encoded Base64 payload:", ln=True)
-    
-        pdf.set_font("Courier", size=10)
-        pdf.multi_cell(0, 6, payload_b64)
-    
-        pdf.ln(10)
+def create_awization_pdf(
+supplier,
+selected_date,
+hour,
+pallets_display,
+payload_b64,):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # Title
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.cell(0, 10, "AWIZACJA / AWIZATION", ln=True)
+
+    pdf.ln(5)
+
+    # Info
+    pdf.set_font("Helvetica", size=12)
+    pdf.cell(0, 8, f"Supplier / Dostawca: {supplier}", ln=True)
+    pdf.cell(0, 8, f"Date / Data: {selected_date}", ln=True)
+    pdf.cell(0, 8, f"Hour / Godzina: {hour}", ln=True)
+    pdf.cell(0, 8, f"Pallets / Palety: {pallets_display}", ln=True)
+
+    pdf.ln(10)
+
+    # Base64 code
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Encoded Base64 payload:", ln=True)
+
+    pdf.set_font("Courier", size=10)
+    pdf.multi_cell(0, 6, payload_b64)
+
+    pdf.ln(10)
 
     # QR code (generated in-memory)
     qr = qrcode.make(payload_b64)
