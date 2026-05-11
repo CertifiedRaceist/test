@@ -11,7 +11,7 @@ from fpdf import FPDF
 from PIL import Image
 
 
-favicon = Image.open(Path(__file__).parent / "assets" / "favicon.png")
+favicon = Image.open(Path(__file__).parent / "assets" / "truck_delpharm.png")
 
 st.set_page_config(
     page_title="Awizacje DPH / Delivery Notifications",
