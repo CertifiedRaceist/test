@@ -64,19 +64,20 @@ gdp_df = get_gdp_data()
 # Draw the actual page
 
 '''
-# Awizacje Delpharm
+# Awizacje DPH
 '''
 
 st.header("Stwórz awizacje/Create avization", divider="gray")
 
 with st.form("awization_form"):
+        supplier = st.text_input(
+        "Wybierz dostawcę/Select supplier",
+            max_chars=40
+    )
+    
     selected_date = st.date_input(
         "Wybierz Date/Select date",
         value=datetime.date.today()
-    )
-    
-    supplier = st.text_input(
-        "Wybierz dostawcę/Select supplier",
     )
 
     hour = st.selectbox(
@@ -110,6 +111,7 @@ if submitted:
     supplier = supplier.strip().upper()
     
     st.success("Submitted successfully!")
-    st.write("Data/Date:", selected_date)
-    st.write("Dostawca/Supplier:", supplier)
-    st.write("Godzina/Hour:", hour)
+    st.write("Data/Date: ", selected_date)
+    st.write("Dostawca/Supplier: ", supplier)
+    st.write("Godzina/Hour: ", hour)
+    st.write("Palety/Pallets: ", pallets)
