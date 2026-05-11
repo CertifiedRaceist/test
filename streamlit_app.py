@@ -91,8 +91,12 @@ with st.form("awization_form"):
 
 if submitted:
     supplier = supplier.strip().upper()
-    display_pallets = "-" if pallets == 0 else pallets
 
+    if not supplier:
+            st.error("Dostawca / Supplier is required")
+            st.stop()
+
+    display_pallets = "-" if pallets == 0 else pallets
     
     payload_b64 = encode_awization_base64(
             supplier,
@@ -101,8 +105,6 @@ if submitted:
             pallets
         )
 
-
-    
     st.success("Submitted successfully!")
     st.write("Data/Date: ", selected_date)
     st.write("Dostawca/Supplier: ", supplier)
