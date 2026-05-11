@@ -8,27 +8,29 @@ import base64
 import qrcode
 from io import BytesIO
 from fpdf import FPDF
+from PIL import Image
 
 
-# Set the title and favicon that appear in the Browser's tab bar.
+favicon = Image.open(Path(__file__).parent / "assets" / "favicon.png")
+
 st.set_page_config(
-    page_title='Awizacje DPH',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
+    page_title="Awizacje DPH / Delivery Notifications",
+    page_icon=favicon,
 )
 
 # -----------------------------------------------------------------------------
 # Declare some useful functions.
 
 @st.cache_data
-def encode_awization_base64(supplier, date, hour, pallets):
+def encode_delivery_notification_base64(supplier, date, hour, pallets):
     supplier_bytes = supplier.encode("ascii", errors="ignore")[:40]
     supplier_bytes = supplier_bytes.ljust(40, b" ")
-    
+
     epoch = datetime.date(1970, 1, 1)
     date_days = (date - epoch).days
 
     h, m = map(int, hour.split(":"))
-    slot = ((h * 60 + m) - (8 * 60)) // 15  # 0–43
+    slot = ((h * 60 + m) - (8 * 60)) // 15
 
     pallets_val = 0 if pallets == 0 else pallets
 
@@ -39,44 +41,42 @@ def encode_awization_base64(supplier, date, hour, pallets):
         slot,
         pallets_val
     )
-    # Encode to Base64 
+
     return base64.urlsafe_b64encode(binary).decode().rstrip("=")
 
-def create_awization_pdf(
-supplier,
-selected_date,
-hour,
-pallets_display,
-payload_b64,):
+
+def create_delivery_notification_pdf(
+    supplier,
+    selected_date,
+    hour,
+    pallets_display,
+    payload_b64,
+):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Title
     pdf.set_font("Helvetica", "B", 16)
-    pdf.cell(0, 10, "AWIZACJA / AWIZATION", ln=True)
+    pdf.cell(0, 10, "AWIZACJA DOSTAWY / DELIVERY NOTIFICATION", ln=True)
 
     pdf.ln(5)
 
-    # Info
     pdf.set_font("Helvetica", size=12)
     pdf.cell(0, 8, f"Supplier / Dostawca: {supplier}", ln=True)
-    pdf.cell(0, 8, f"Date / Data: {selected_date}", ln=True)
-    pdf.cell(0, 8, f"Hour / Godzina: {hour}", ln=True)
+    pdf.cell(0, 8, f"Delivery date / Data dostawy: {selected_date}", ln=True)
+    pdf.cell(0, 8, f"Time slot / Przedział czasowy: {hour}", ln=True)
     pdf.cell(0, 8, f"Pallets / Palety: {pallets_display}", ln=True)
 
     pdf.ln(10)
 
-    # Base64 code
     pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 8, "Encoded Base64 payload:", ln=True)
+    pdf.cell(0, 8, "DPH Code / Kod DPH:", ln=True)
 
     pdf.set_font("Courier", size=10)
     pdf.multi_cell(0, 6, payload_b64)
 
     pdf.ln(10)
 
-    # QR code (generated in-memory)
     qr = qrcode.make(payload_b64)
     qr_buf = BytesIO()
     qr.save(qr_buf)
@@ -84,35 +84,36 @@ payload_b64,):
 
     pdf.image(qr_buf, x=60, y=None, w=90)
 
-    # Output PDF to bytes
     pdf_buf = BytesIO()
     pdf.output(pdf_buf)
     pdf_buf.seek(0)
 
     return pdf_buf
+
+
 # -----------------------------------------------------------------------------
 # Draw the actual page
 
 '''
-# Awizacje DPH
+# Awizacje DPH / Delivery Notifications
 '''
 
-st.header("Stwórz awizacje/Create avization", divider="gray")
+st.header("Stwórz awizację / Create delivery notification", divider="gray")
 
-with st.form("awization_form"):
-    
+with st.form("delivery_notification_form"):
+
     supplier = st.text_input(
-        "Wybierz dostawcę/Select supplier",
-            max_chars=40
+        "Wybierz dostawcę / Select supplier",
+        max_chars=40
     )
-    
+
     selected_date = st.date_input(
-        "Wybierz Date/Select date",
+        "Wybierz datę dostawy / Select delivery date",
         value=datetime.date.today()
     )
 
     hour = st.selectbox(
-        "Wybierz godzinę/Select hour",
+        "Wybierz przedział czasowy / Select time slot",
         [
             "08:00", "08:15", "08:30", "08:45",
             "09:00", "09:15", "09:30", "09:45",
@@ -129,33 +130,33 @@ with st.form("awization_form"):
     )
 
     pallets = st.number_input(
-        "Liczba palet/Number of pallets", 
+        "Liczba palet / Number of pallets",
         min_value=0,
         max_value=999,
         step=1,
-        placeholder="0 gdy nie dotyczy/0 if not applicable"
+        placeholder="0 gdy nie dotyczy / 0 if not applicable"
     )
 
+    submitted = st.form_submit_button("Potwierdź / Generate notification")
 
-    submitted = st.form_submit_button("Potwierdź/Submit")
 
 if submitted:
     supplier = supplier.strip().upper()
 
     if not supplier:
-        st.error("Dostawca / Supplier is required")
+        st.error("Dostawca jest wymagany / Supplier is required")
         st.stop()
 
     pallets_display = "-" if pallets == 0 else pallets
 
-    payload_b64 = encode_awization_base64(
+    payload_b64 = encode_delivery_notification_base64(
         supplier,
         selected_date,
         hour,
         pallets
     )
 
-    pdf_buf = create_awization_pdf(
+    pdf_buf = create_delivery_notification_pdf(
         supplier,
         selected_date,
         hour,
@@ -163,11 +164,11 @@ if submitted:
         payload_b64,
     )
 
-    st.success("Awizacja wygenerowana / Awization generated")
+    st.success("Awizacja wygenerowana / Delivery notification generated")
 
     st.download_button(
-        label="⬇️ Download PDF",
+        label="⬇️ Pobierz PDF / Download PDF",
         data=pdf_buf,
-        file_name="awization.pdf",
+        file_name="awizacja_dostawy_delivery_notification.pdf",
         mime="application/pdf",
     )
