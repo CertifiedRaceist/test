@@ -7,6 +7,7 @@ import struct
 import base64
 import qrcode
 from io import BytesIO
+from fpdf import FPDF
 
 
 # Set the title and favicon that appear in the Browser's tab bar.
@@ -40,6 +41,56 @@ def encode_awization_base64(supplier, date, hour, pallets):
     )
     # Encode to Base64 
     return base64.urlsafe_b64encode(binary).decode().rstrip("=")
+
+    def create_awization_pdf(
+    supplier,
+    selected_date,
+    hour,
+    pallets_display,
+    payload_b64,
+):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # Title
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.cell(0, 10, "AWIZACJA / AWIZATION", ln=True)
+
+    pdf.ln(5)
+
+    # Info
+    pdf.set_font("Helvetica", size=12)
+    pdf.cell(0, 8, f"Supplier / Dostawca: {supplier}", ln=True)
+    pdf.cell(0, 8, f"Date / Data: {selected_date}", ln=True)
+    pdf.cell(0, 8, f"Hour / Godzina: {hour}", ln=True)
+    pdf.cell(0, 8, f"Pallets / Palety: {pallets_display}", ln=True)
+
+    pdf.ln(10)
+
+    # Base64 code
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Encoded Base64 payload:", ln=True)
+
+    pdf.set_font("Courier", size=10)
+    pdf.multi_cell(0, 6, payload_b64)
+
+    pdf.ln(10)
+
+    # QR code (generated in-memory)
+    qr = qrcode.make(payload_b64)
+    qr_buf = BytesIO()
+    qr.save(qr_buf)
+    qr_buf.seek(0)
+
+    pdf.image(qr_buf, x=60, y=None, w=90)
+
+    # Output PDF to bytes
+    pdf_buf = BytesIO()
+    pdf.output(pdf_buf)
+    pdf_buf.seek(0)
+
+    return pdf_buf
 # -----------------------------------------------------------------------------
 # Draw the actual page
 
@@ -93,33 +144,31 @@ if submitted:
     supplier = supplier.strip().upper()
 
     if not supplier:
-            st.error("Dostawca / Supplier is required")
-            st.stop()
+        st.error("Dostawca / Supplier is required")
+        st.stop()
 
-    display_pallets = "-" if pallets == 0 else pallets
-    
+    pallets_display = "-" if pallets == 0 else pallets
+
     payload_b64 = encode_awization_base64(
-            supplier,
-            selected_date,
-            hour,
-            pallets
-        )
+        supplier,
+        selected_date,
+        hour,
+        pallets
+    )
 
-    st.success("Submitted successfully!")
-    st.write("Data/Date: ", selected_date)
-    st.write("Dostawca/Supplier: ", supplier)
-    st.write("Godzina/Hour: ", hour)
-    st.write("Palety/Pallets: ", display_pallets)
+    pdf_buf = create_awization_pdf(
+        supplier,
+        selected_date,
+        hour,
+        pallets_display,
+        payload_b64,
+    )
 
-    
-    st.subheader("Kod Base64")
-    st.code(payload_b64, language="text")
+    st.success("Awizacja wygenerowana / Awization generated")
 
-    # Generate QR
-    qr = qrcode.make(payload_b64)
-    buf = BytesIO()
-    qr.save(buf)
-
-    st.subheader("QR Code")
-    st.image(buf, caption="Zeskanuj kod QR / Scan QR")
-
+    st.download_button(
+        label="⬇️ Download PDF",
+        data=pdf_buf,
+        file_name="awization.pdf",
+        mime="application/pdf",
+    )
