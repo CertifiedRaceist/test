@@ -130,7 +130,7 @@ with st.form("delivery_notification_form"):
     )
 
     pallets = st.number_input(
-        "Liczba palet / Number of pallets",
+        "Liczba palet (0 jeśli nie dotyczy)/ Number of pallets (0 if not applicable)",
         min_value=0,
         max_value=999,
         step=1,
