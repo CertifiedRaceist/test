@@ -130,12 +130,13 @@ with st.form("delivery_notification_form"):
     )
 
     pallets = st.number_input(
-        "Liczba palet (0 jeśli nie dotyczy)/ Number of pallets (0 if not applicable)",
+        "Liczba palet / Number of pallets",
         min_value=0,
         max_value=999,
         step=1,
         placeholder="0 gdy nie dotyczy / 0 if not applicable"
     )
+    st.caption("0 jeśli nie dotyczy / 0 if not applicable")
 
     submitted = st.form_submit_button("Potwierdź / Generate notification")
 
