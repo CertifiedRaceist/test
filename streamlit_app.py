@@ -70,7 +70,8 @@ gdp_df = get_gdp_data()
 st.header("Stwórz awizacje/Create avization", divider="gray")
 
 with st.form("awization_form"):
-        supplier = st.text_input(
+    
+    supplier = st.text_input(
         "Wybierz dostawcę/Select supplier",
             max_chars=40
     )
@@ -95,7 +96,6 @@ with st.form("awization_form"):
             "17:00", "17:15", "17:30", "17:45",
             "18:00", "18:15", "18:30", "18:45"
         ]
-
     )
 
     pallets = st.number_input(
