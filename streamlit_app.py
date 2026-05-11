@@ -99,9 +99,10 @@ with st.form("awization_form"):
     )
 
     pallets = st.number_input(
-        "Liczba palet/Number of pallets",
-        min_value=1,
-        step=1
+        "Liczba palet/Number of pallets", 
+        min_value=0,
+        step=1,
+        placeholder="0 if not applicable"
     )
 
 
@@ -109,9 +110,11 @@ with st.form("awization_form"):
 
 if submitted:
     supplier = supplier.strip().upper()
+    display_pallets = "-" if pallets == 0 else pallets
+
     
     st.success("Submitted successfully!")
     st.write("Data/Date: ", selected_date)
     st.write("Dostawca/Supplier: ", supplier)
     st.write("Godzina/Hour: ", hour)
-    st.write("Palety/Pallets: ", pallets)
+    st.write("Palety/Pallets: ", display-pallets)
