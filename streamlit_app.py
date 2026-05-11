@@ -50,18 +50,24 @@ def create_delivery_notification_pdf(
     selected_date,
     hour,
     pallets_display,
-    payload_b64,
-):
+    payload_b64,):
+        
+    pdf.add_font(
+        "NotoSans",
+        "",
+        str(Path(__file__).parent / "fonts" / "NotoSans-VariableFont_wdth,wght.ttf"),
+        uni=True
+    )
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_font("NotoSans", "B", 16)
     pdf.cell(0, 10, "AWIZACJA DOSTAWY / DELIVERY NOTIFICATION", ln=True)
 
     pdf.ln(5)
 
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("NotoSans", size=12)
     pdf.cell(0, 8, f"Supplier / Dostawca: {supplier}", ln=True)
     pdf.cell(0, 8, f"Delivery date / Data dostawy: {selected_date}", ln=True)
     pdf.cell(0, 8, f"Time slot / Przedział czasowy: {hour}", ln=True)
@@ -69,7 +75,7 @@ def create_delivery_notification_pdf(
 
     pdf.ln(10)
 
-    pdf.set_font("Helvetica", "B", 12)
+    pdf.set_font("NotoSans", "B", 12)
     pdf.cell(0, 8, "DPH Code / Kod DPH:", ln=True)
 
     pdf.set_font("Courier", size=10)
